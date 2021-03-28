@@ -4,7 +4,8 @@
 ## Features
 - [x] Line diagnostics
 - [x] Code actions for fixes and suggestions
-- [ ] Document format
+- [x] Document formatting for fixes
+- [ ] Range document formatting
 
 ## Installation
 ```sh
@@ -43,5 +44,5 @@ if not lspconfig.eslintls then
   }
 end
 
-require'lspconfig'.eslint.setup{}
+lspconfig.eslintls.setup{}
 ```
