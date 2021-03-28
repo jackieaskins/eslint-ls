@@ -1,0 +1,37 @@
+{
+  "name": "eslint-ls",
+  "version": "1.0.0",
+  "description": "ESLint Language Server",
+  "author": "jackieaskins",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jackieaskins/eslint-ls"
+  },
+  "bin": {
+    "eslint-ls": "./dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "distribute": "npm run build && npm link",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "eslint": "^7.23.0",
+    "lodash": "^4.17.21",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.1",
+    "vscode-uri": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/eslint": "^7.2.7",
+    "@types/lodash": "^4.14.168",
+    "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "prettier": "^2.2.1",
+    "typescript": "^4.2.3"
+  }
+}
