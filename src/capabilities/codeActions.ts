@@ -1,31 +1,9 @@
 import { Rule } from 'eslint';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import {
-  CodeAction,
-  CodeActionKind,
-  WorkspaceEdit,
-} from 'vscode-languageserver-types';
+import { CodeAction, CodeActionKind } from 'vscode-languageserver-types';
 
 import { ESLintDiagnostic } from './diagnostics';
-
-function getEditFromFix(
-  { range, text }: Rule.Fix,
-  document: TextDocument
-): WorkspaceEdit {
-  return {
-    changes: {
-      [document.uri]: [
-        {
-          range: {
-            start: document.positionAt(range[0]),
-            end: document.positionAt(range[1]),
-          },
-          newText: text,
-        },
-      ],
-    },
-  };
-}
+import { getWorkspaceEditFromFix } from '../utils/edits';
 
 function createCodeActionFromFix(
   fix: Rule.Fix,
@@ -39,7 +17,7 @@ function createCodeActionFromFix(
     kind: CodeActionKind.QuickFix,
     isPreferred,
     diagnostics,
-    edit: getEditFromFix(fix, document),
+    edit: getWorkspaceEditFromFix(fix, document),
   };
 }
 

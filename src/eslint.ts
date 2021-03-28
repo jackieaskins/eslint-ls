@@ -1,15 +1,13 @@
 import { ESLint } from 'eslint';
-import { dirname } from 'path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 
-export async function lint(
-  fileUri: string,
-  textDocument: TextDocument
-): Promise<ESLint.LintResult[]> {
-  const filePath = URI.parse(fileUri).path;
-  const cwd = dirname(filePath);
-  const engine = new ESLint({ cwd });
+const engine = new ESLint();
 
-  return await engine.lintText(textDocument.getText(), { filePath });
+export async function lint(
+  document: TextDocument
+): Promise<ESLint.LintResult[]> {
+  const filePath = URI.parse(document.uri).path;
+
+  return await engine.lintText(document.getText(), { filePath });
 }
