@@ -14,7 +14,7 @@ import { ESLintDiagnostic, getDiagnostics } from './capabilities/diagnostics';
 import { getFormattingTextEdits } from './capabilities/documentFormatting';
 import { lint } from './eslint';
 
-const DEBOUNCE_MS = 1000;
+const DEBOUNCE_MS = 250;
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
