@@ -38,7 +38,9 @@ export function getDiagnostics(
           },
         },
         code: ruleId ?? undefined,
-        message: `[eslint] ${message} [${ruleId}]`,
+        message: ['[eslint]', message, ruleId && `[${ruleId}]`]
+          .filter((item) => !!item)
+          .join(' '),
         source: 'eslint',
         data: {
           fix,

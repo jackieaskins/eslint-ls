@@ -45,14 +45,14 @@ connection.onInitialize(() => ({
 }));
 
 connection.onCodeAction(
-  ({ context: { diagnostics }, textDocument: { uri } }) => {
+  ({ context: { diagnostics }, range, textDocument: { uri } }) => {
     const document = documents.get(uri);
 
     if (!document) {
       return [];
     }
 
-    return getCodeActions(diagnostics as ESLintDiagnostic[], document);
+    return getCodeActions(diagnostics as ESLintDiagnostic[], document, range);
   }
 );
 

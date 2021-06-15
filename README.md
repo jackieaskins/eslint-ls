@@ -4,6 +4,7 @@
 ## Features
 - [x] Line diagnostics
 - [x] Code actions for fixes and suggestions
+- [x] Disable rule code actions
 - [x] Document formatting for fixes
 - [ ] Range document formatting
 
@@ -21,7 +22,7 @@ local lspconfig = require'lspconfig'
 local configs = require'lspconfig/configs'
 local util = require'lspconfig/util'
 
-if not lspconfig.eslintls then
+if not configs.eslintls then
   configs.eslintls = {
     default_config = {
       cmd = {'eslint-ls', '--stdio'};
