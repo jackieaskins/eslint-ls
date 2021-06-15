@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "distribute": "npm run build && npm link",
+    "distribute": "npm run build && chmod +x ./dist/server.js && npm link",
     "watch": "tsc --watch"
   },
   "dependencies": {
