@@ -1,6 +1,6 @@
 import { Rule } from 'eslint';
 import _ from 'lodash';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { CodeAction, CodeActionKind, Range } from 'vscode-languageserver-types';
 
 import { getWorkspaceEditFromFix } from '../utils/edits';
@@ -22,39 +22,41 @@ function createCodeActionFromFix(
   };
 }
 
-export function getCodeActions(
+function getDiagnosticCodeActions(
+  diagnostics: ESLintDiagnostic[],
+  document: TextDocument
+): CodeAction[] {
+  return diagnostics.reduce<CodeAction[]>((accum, diagnostic): CodeAction[] => {
+    const { code, data } = diagnostic;
+    const { fix, suggestions } = data ?? {};
+
+    const fixCodeActions = fix
+      ? [
+          createCodeActionFromFix(
+            fix,
+            document,
+            [diagnostic],
+            `Fix ${code}`,
+            true
+          ),
+        ]
+      : [];
+
+    const suggestionsCodeActions = suggestions
+      ? suggestions.map(({ desc, fix }) =>
+          createCodeActionFromFix(fix, document, [diagnostic], desc, false)
+        )
+      : [];
+
+    return [...accum, ...fixCodeActions, ...suggestionsCodeActions];
+  }, []);
+}
+
+export function getDisableCodeActions(
   diagnostics: ESLintDiagnostic[],
   document: TextDocument,
   range: Range
 ): CodeAction[] {
-  const codeActions = diagnostics.reduce<CodeAction[]>(
-    (accum, diagnostic): CodeAction[] => {
-      const { code, data } = diagnostic;
-      const { fix, suggestions } = data;
-
-      const fixCodeActions = fix
-        ? [
-            createCodeActionFromFix(
-              fix,
-              document,
-              [diagnostic],
-              `Fix ${code}`,
-              true
-            ),
-          ]
-        : [];
-
-      const suggestionsCodeActions = suggestions
-        ? suggestions.map(({ desc, fix }) =>
-            createCodeActionFromFix(fix, document, [diagnostic], desc, false)
-          )
-        : [];
-
-      return [...accum, ...fixCodeActions, ...suggestionsCodeActions];
-    },
-    []
-  );
-
   const uniqueCodes = _.uniq(
     diagnostics.map(({ code }) => code).filter((code) => !!code)
   );
@@ -65,46 +67,50 @@ export function getCodeActions(
   });
   const indent = currentLine.match(/\s+/g)?.[0] ?? '';
 
-  const disableActions = uniqueCodes.flatMap((code) => [
-    {
-      title: `[eslint] Disable ${code} for current line`,
-      kind: CodeActionKind.QuickFix,
-      isPreferred: false,
-      diagnostics,
-      edit: {
-        changes: {
-          [document.uri]: [
-            {
-              range: {
-                start: { line: range.start.line, character: 0 },
-                end: { line: range.start.line, character: 0 },
-              },
-              newText: `${indent}// eslint-disable-next-line ${code}\n`,
-            },
-          ],
+  return uniqueCodes.flatMap((code) => {
+    function formatDisableCodeAction(
+      scope: string,
+      change: TextEdit
+    ): CodeAction {
+      return {
+        title: `[eslint] Disable ${code} for ${scope}`,
+        kind: CodeActionKind.QuickFix,
+        isPreferred: false,
+        diagnostics: diagnostics.filter(({ code: c }) => code === c),
+        edit: {
+          changes: {
+            [document.uri]: [change],
+          },
         },
-      },
-    },
-    {
-      title: `[eslint] Disable ${code} for file`,
-      kind: CodeActionKind.QuickFix,
-      isPreferred: false,
-      diagnostics,
-      edit: {
-        changes: {
-          [document.uri]: [
-            {
-              range: {
-                start: { line: 0, character: 0 },
-                end: { line: 0, character: 0 },
-              },
-              newText: `/* eslint-disable ${code} */\n`,
-            },
-          ],
-        },
-      },
-    },
-  ]);
+      };
+    }
 
-  return [...codeActions, ...disableActions];
+    return [
+      formatDisableCodeAction('current line', {
+        range: {
+          start: { line: range.start.line, character: 0 },
+          end: { line: range.start.line, character: 0 },
+        },
+        newText: `${indent}// eslint-disable-next-line ${code}\n`,
+      }),
+      formatDisableCodeAction('file', {
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 0, character: 0 },
+        },
+        newText: `/* eslint-disable ${code} */\n`,
+      }),
+    ];
+  });
+}
+
+export function getCodeActions(
+  diagnostics: ESLintDiagnostic[],
+  document: TextDocument,
+  range: Range
+): CodeAction[] {
+  return [
+    ...getDiagnosticCodeActions(diagnostics, document),
+    ...getDisableCodeActions(diagnostics, document, range),
+  ];
 }

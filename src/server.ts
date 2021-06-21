@@ -52,7 +52,15 @@ connection.onCodeAction(
       return [];
     }
 
-    return getCodeActions(diagnostics as ESLintDiagnostic[], document, range);
+    const eslintDiagnostics = diagnostics.filter(
+      ({ source }) => source === 'eslint'
+    );
+
+    return getCodeActions(
+      eslintDiagnostics as ESLintDiagnostic[],
+      document,
+      range
+    );
   }
 );
 
